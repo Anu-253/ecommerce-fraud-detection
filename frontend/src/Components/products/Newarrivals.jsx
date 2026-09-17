@@ -1,6 +1,7 @@
 import axios from 'axios';
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { FiArrowLeft, FiArrowRight, FiHeart, FiArrowUpRight } from 'react-icons/fi';
 
 const Newarrivals = () => {
   const scroll = useRef(null);
@@ -8,12 +9,11 @@ const Newarrivals = () => {
   const [scrolLeft, setscrolleft] = useState(false);
   const [scrollright, setscrollright] = useState(true);
   const [newArrivals, setNewArrivals] = useState([]);
-  const [loading, setLoading] = useState(true);
 
   const scrollLeft = () => {
     if (scroll.current) {
       scroll.current.scrollBy({
-        left: -300,
+        left: -350,
         behavior: 'smooth',
       });
     }
@@ -22,7 +22,7 @@ const Newarrivals = () => {
   const scrollRight = () => {
     if (scroll.current) {
       scroll.current.scrollBy({
-        left: 300,
+        left: 350,
         behavior: 'smooth',
       });
     }
@@ -31,32 +31,21 @@ const Newarrivals = () => {
   useEffect(() => {
     const fetchNewArrivals = async () => {
       try {
-        setLoading(true);
-
         const response = await axios.get(
           `${import.meta.env.VITE_BACKEND_URL}/api/products/new-arrival`
         );
 
-        console.log('New arrivals response:', response.data);
-
-        // Backend normally returns an array.
-        // This also handles { products: [...] } if the API changes.
         if (Array.isArray(response.data)) {
           setNewArrivals(response.data);
         } else if (Array.isArray(response.data?.products)) {
           setNewArrivals(response.data.products);
         } else {
-          console.error(
-            'Unexpected new arrivals response:',
-            response.data
-          );
+          console.error('Unexpected new arrivals response:', response.data);
           setNewArrivals([]);
         }
       } catch (error) {
         console.error('Error fetching new arrivals:', error);
         setNewArrivals([]);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -71,8 +60,7 @@ const Newarrivals = () => {
     setscrolleft(container.scrollLeft > 0);
 
     setscrollright(
-      container.scrollLeft + container.clientWidth <
-        container.scrollWidth
+      container.scrollLeft + container.clientWidth < container.scrollWidth
     );
   };
 
@@ -82,7 +70,6 @@ const Newarrivals = () => {
     if (!container) return;
 
     container.addEventListener('scroll', updateScrollButtons);
-
     updateScrollButtons();
 
     return () => {
@@ -91,93 +78,113 @@ const Newarrivals = () => {
   }, [newArrivals]);
 
   return (
-    <section className="py-10">
-      {/* Section heading */}
-      <div className="container mb-10 mx-auto text-center relative px-4">
-        <h2 className="text-3xl font-bold mb-4">
-          Explore New Arrivals
-        </h2>
-
-        <p className="text-lg text-black mb-8">
-          Discover the latest styles of runway, freshly added to your wardrobe.
-        </p>
-
-        {/* Scroll buttons */}
-        <div className="absolute right-4 bottom-[-30px] flex space-x-2">
-          <button
-            onClick={scrollLeft}
-            disabled={!scrolLeft}
-            className={`p-2 rounded border ${
-              scrolLeft
-                ? 'bg-black text-white'
-                : 'bg-gray-400 text-white cursor-not-allowed'
-            }`}
-            aria-label="Scroll left"
-          >
-            <i className="ri-arrow-left-double-line"></i>
-          </button>
-
-          <button
-            onClick={scrollRight}
-            disabled={!scrollright}
-            className={`p-2 rounded border ${
-              scrollright
-                ? 'bg-black text-white'
-                : 'bg-gray-400 text-white cursor-not-allowed'
-            }`}
-            aria-label="Scroll right"
-          >
-            <i className="ri-arrow-right-double-line"></i>
-          </button>
-        </div>
-      </div>
-
-      {/* Products */}
+    <section>
+      {/* Product carousel */}
       <div
         ref={scroll}
-        className="container mx-auto overflow-x-auto flex space-x-6 px-4 pb-4 scrollbar-hide"
+        className="mx-auto flex max-w-[1400px] gap-5 overflow-x-auto px-4 pb-6 scrollbar-hide sm:px-6"
         style={{ scrollBehavior: 'smooth' }}
       >
-        {loading ? (
-          <div className="w-full text-center py-10 text-gray-500">
-            Loading new arrivals...
-          </div>
-        ) : newArrivals.length > 0 ? (
+        {newArrivals.length > 0 ? (
           newArrivals.map((product) => (
             <div
               key={product._id}
-              className="min-w-[100%] relative sm:min-w-[50%] lg:min-w-[30%]"
+              className="group min-w-[82%] sm:min-w-[45%] lg:min-w-[31%]"
             >
-              <Link to={`/product/${product._id}`}>
-                <div className="w-full h-[300px] flex items-center justify-center bg-white rounded-xl shadow-md overflow-hidden">
-                  <img
-                    src={product.images?.[0]?.url}
-                    alt={
-                      product.images?.[0]?.altText ||
-                      product.name ||
-                      'Product image'
-                    }
-                    className="max-h-full max-w-full object-contain"
-                  />
+              <div className="relative overflow-hidden rounded-[24px] bg-[#f1ede9]">
+                {/* Image */}
+                <Link to={`/product/${product._id}`}>
+                  <div className="flex h-[390px] items-center justify-center overflow-hidden">
+                    <img
+                      src={product.images?.[0]?.url}
+                      alt={
+                        product.images?.[0]?.altText ||
+                        product.name ||
+                        'Product image'
+                      }
+                      className="h-full w-full object-contain p-4 transition duration-700 group-hover:scale-105"
+                    />
+                  </div>
+                </Link>
+
+                {/* New badge */}
+                <div className="absolute left-4 top-4 rounded-full bg-white px-3 py-1.5 text-[10px] font-semibold uppercase tracking-[0.15em] text-[#321326] shadow-sm">
+                  New
                 </div>
 
-                <div className="mt-3 text-left">
-                  <h3 className="font-semibold text-lg">
-                    {product.name}
+                {/* Wishlist */}
+                <button
+                  type="button"
+                  aria-label="Add to wishlist"
+                  className="absolute right-4 top-4 flex h-10 w-10 items-center justify-center rounded-full bg-white text-[#321326] shadow-sm transition hover:scale-105"
+                >
+                  <FiHeart size={17} />
+                </button>
+
+                {/* View button */}
+                <Link
+                  to={`/product/${product._id}`}
+                  className="absolute bottom-4 left-4 right-4 flex items-center justify-between rounded-xl bg-white/95 px-4 py-3 text-sm font-semibold text-[#321326] opacity-0 shadow-sm backdrop-blur transition duration-300 group-hover:opacity-100"
+                >
+                  <span>View Product</span>
+                  <FiArrowUpRight size={18} />
+                </Link>
+              </div>
+
+              {/* Product information */}
+              <div className="px-1 pt-4">
+                <Link to={`/product/${product._id}`}>
+                  <h3 className="line-clamp-1 text-sm font-semibold text-[#21151b] transition hover:text-[#7b315f]">
+                    {product.name || 'Product'}
                   </h3>
+                </Link>
 
-                  <p className="text-gray-600">
-                    ₹{product.price}
+                <div className="mt-2 flex items-center justify-between">
+                  <p className="text-sm font-medium text-[#321326]">
+                    ₹{Number(product.price || 0).toLocaleString('en-IN')}
                   </p>
+
+                  <span className="text-xs text-gray-400">
+                    New arrival
+                  </span>
                 </div>
-              </Link>
+              </div>
             </div>
           ))
         ) : (
-          <div className="w-full text-center py-10 text-gray-500">
+          <div className="w-full py-10 text-center text-sm text-gray-500">
             No new arrivals available at the moment.
           </div>
         )}
+      </div>
+
+      {/* Carousel controls */}
+      <div className="mx-auto mt-2 flex max-w-[1400px] justify-end gap-2 px-4 sm:px-6">
+        <button
+          onClick={scrollLeft}
+          disabled={!scrolLeft}
+          aria-label="Scroll left"
+          className={`flex h-11 w-11 items-center justify-center rounded-full border transition ${
+            scrolLeft
+              ? 'border-[#321326] bg-[#321326] text-white hover:bg-[#54203f]'
+              : 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-300'
+          }`}
+        >
+          <FiArrowLeft size={18} />
+        </button>
+
+        <button
+          onClick={scrollRight}
+          disabled={!scrollright}
+          aria-label="Scroll right"
+          className={`flex h-11 w-11 items-center justify-center rounded-full border transition ${
+            scrollright
+              ? 'border-[#321326] bg-[#321326] text-white hover:bg-[#54203f]'
+              : 'cursor-not-allowed border-gray-200 bg-gray-100 text-gray-300'
+          }`}
+        >
+          <FiArrowRight size={18} />
+        </button>
       </div>
     </section>
   );
