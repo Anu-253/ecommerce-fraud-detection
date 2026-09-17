@@ -1,116 +1,364 @@
-import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
-import Search from './Search'
-import CartDrawer from "../Layout/CartDrawer"
-import { useSelector } from 'react-redux'
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import {
+  FiUser,
+  FiShoppingBag,
+  FiMenu,
+  FiX,
+  FiHeart,
+  FiSearch,
+  FiChevronDown,
+} from 'react-icons/fi';
+import { useSelector } from 'react-redux';
+
+import Search from './Search';
+import CartDrawer from '../Layout/CartDrawer';
 
 const Navbar = () => {
-  const [draweropen, setdraweropen] = useState(false)
-  const [menuopen, setmenuopen] = useState(false)
-  const {cart}=useSelector((state)=>state.cart);
-  const {user}=useSelector((state)=>state.auth);
-  const cartItemCount=cart?.products?.reduce((total,product)=>total+product.quantity,0)||0;
+  const [draweropen, setdraweropen] = useState(false);
+  const [menuopen, setmenuopen] = useState(false);
 
-  const handlemenuopen = () => {
-    setmenuopen(!menuopen)
-  }
+  const { cart } = useSelector((state) => state.cart);
+  const { user } = useSelector((state) => state.auth);
 
-  const handlecartdrawer = () => {
-    setdraweropen(!draweropen)
-  }
+  const cartItemCount =
+    cart?.products?.reduce(
+      (total, product) => total + product.quantity,
+      0
+    ) || 0;
+
+  const handleCartDrawer = () => {
+    setdraweropen(!draweropen);
+  };
+
+  const handleMenuOpen = () => {
+    setmenuopen(!menuopen);
+  };
 
   return (
     <>
-      <nav className='container mx-auto flex items-center p-2 justify-between'>
-        <div>
-          <Link to="/" className='font-extrabold text-lg p-2'>
-            FASSION ERA.
-          </Link>
-        </div>
+      {/* MAIN HEADER */}
+      <header className="sticky top-0 z-40 bg-[#fbf8f4]">
 
-        {/* Desktop Menu */}
-        <div className='hidden md:flex'>
-          <Link to="/collection/all?gender=Men" className='text-gray-600 hover:text-black p-4'>
-            Mens
-          </Link>
-          <Link to="/collection/all?gender=Women" className='text-gray-600 hover:text-black p-4'>
-            Women
-          </Link>
-          <Link to="/collection/all?category=Top+Wear" className='text-gray-600 hover:text-black p-4'>
-            Top wear
-          </Link>
-          <Link to="/collection/all?category=Bottom+Wear" className='text-gray-600 hover:text-black p-4'>
-            Bottom wear
-          </Link>
-        </div>
+        {/* TOP ROW */}
+        <div className="border-b border-[#24161d]/10">
+          <div className="mx-auto flex h-[72px] max-w-[1500px] items-center justify-between px-5 sm:px-8">
 
-        {/* Icons */}
-        <div className="flex items-center space-x-4">
-          {user && user.role==="admin" && (<Link to="/admin" className='bg-black text-white px-3 py-1 rounded hover:bg-gray-800'>
-            Admin
-          </Link>)}
-          
-          <Link to="/profile" className="p-3 hover:text-colors-primary relative">
-            <i className="ri-user-line text-xl"></i>
-          </Link>
+            {/* MOBILE MENU */}
+            <button
+              onClick={handleMenuOpen}
+              className="rounded-full p-2 lg:hidden"
+              type="button"
+              aria-label="Open menu"
+            >
+              <FiMenu size={23} />
+            </button>
 
-          <div className='overflow-hidden'>
-            <Search />
+            {/* DESKTOP LEFT */}
+            <div className="hidden items-center gap-7 lg:flex">
+              <Link
+                to="/collection/all?gender=Women"
+                className="text-xs font-semibold uppercase tracking-[0.18em] transition hover:text-[#7b315f]"
+              >
+                Women
+              </Link>
+
+              <Link
+                to="/collection/all?gender=Men"
+                className="text-xs font-semibold uppercase tracking-[0.18em] transition hover:text-[#7b315f]"
+              >
+                Men
+              </Link>
+
+              <Link
+                to="/collection/all?category=Top+Wear"
+                className="text-xs font-semibold uppercase tracking-[0.18em] transition hover:text-[#7b315f]"
+              >
+                Clothing
+              </Link>
+
+              <Link
+                to="/collection/all"
+                className="flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.18em] transition hover:text-[#7b315f]"
+              >
+                Collections
+                <FiChevronDown size={13} />
+              </Link>
+            </div>
+
+            {/* LOGO */}
+            <Link
+              to="/"
+              className="absolute left-1/2 -translate-x-1/2 text-center"
+            >
+              <div className="font-serif text-2xl font-bold tracking-[0.08em] text-[#321326] sm:text-3xl">
+                SHOPSHIELD
+              </div>
+
+              <div className="mt-1 text-[7px] font-semibold uppercase tracking-[0.38em] text-[#7b315f]">
+                Fashion · Trust · You
+              </div>
+            </Link>
+
+            {/* RIGHT */}
+            <div className="ml-auto flex items-center gap-1 sm:gap-3">
+
+              {/* SEARCH */}
+              <div className="hidden xl:block">
+                <Search />
+              </div>
+
+              <button
+                type="button"
+                className="hidden rounded-full p-2.5 transition hover:bg-[#eee5e8] sm:block"
+                aria-label="Search"
+              >
+                <FiSearch size={19} />
+              </button>
+
+              {/* WISHLIST */}
+              <button
+                type="button"
+                className="hidden rounded-full p-2.5 transition hover:bg-[#eee5e8] sm:block"
+                aria-label="Wishlist"
+              >
+                <FiHeart size={19} />
+              </button>
+
+              {/* ACCOUNT */}
+              <Link
+                to="/profile"
+                className="rounded-full p-2.5 transition hover:bg-[#eee5e8]"
+                aria-label="Account"
+              >
+                <FiUser size={20} />
+              </Link>
+
+              {/* CART */}
+              <button
+                onClick={handleCartDrawer}
+                type="button"
+                className="relative rounded-full p-2.5 transition hover:bg-[#eee5e8]"
+                aria-label="Shopping bag"
+              >
+                <FiShoppingBag size={20} />
+
+                {cartItemCount > 0 && (
+                  <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[#321326] px-1 text-[9px] font-bold text-white">
+                    {cartItemCount}
+                  </span>
+                )}
+              </button>
+
+              {/* ADMIN */}
+              {user && user.role === 'admin' && (
+                <Link
+                  to="/admin"
+                  className="hidden rounded-full bg-[#321326] px-4 py-2 text-[10px] font-bold uppercase tracking-wider text-white lg:block"
+                >
+                  Admin
+                </Link>
+              )}
+
+            </div>
           </div>
-
-          <button onClick={handlecartdrawer} className='hover:text-colors-primary relative p-3'>
-            <i className="ri-shopping-cart-fill"></i>
-            {cartItemCount>0 &&( <span className='text-sm px-1.5 text-white rounded-full bg-colors-primary absolute -top-0 -right-0'>
-              {cartItemCount}
-            </span>)}
-           
-          </button>
-
-          <button onClick={handlemenuopen}>
-            <i className="ri-menu-3-fill text-xl"></i>
-          </button>
         </div>
-      </nav>
 
-      {/* Cart Drawer */}
-      <CartDrawer draweropen={draweropen} handlecartdrawer={handlecartdrawer} />
+        {/* DESKTOP CATEGORY BAR */}
+        <div className="hidden border-b border-[#24161d]/10 bg-[#fbf8f4] lg:block">
+          <div className="mx-auto flex h-12 max-w-[1500px] items-center justify-center gap-10">
 
-      {/* Mobile Sidebar Menu */}
-      <div
-        className={`left-0 fixed top-0 sm:w-1/2 md:w-[30rem] w-3/4 h-full bg-white shadow-lg transform transition-transform duration-300 flex flex-col z-50 
-        ${menuopen ? 'translate-x-0' : '-translate-x-full'}`}
+            <Link
+              to="/collection/all"
+              className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-600 transition hover:text-[#321326]"
+            >
+              New Arrivals
+            </Link>
+
+            <Link
+              to="/collection/all?category=Top+Wear"
+              className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-600 transition hover:text-[#321326]"
+            >
+              Tops
+            </Link>
+
+            <Link
+              to="/collection/all?category=Bottom+Wear"
+              className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-600 transition hover:text-[#321326]"
+            >
+              Bottoms
+            </Link>
+
+            <Link
+              to="/collection/all?category=Dresses"
+              className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-600 transition hover:text-[#321326]"
+            >
+              Dresses
+            </Link>
+
+            <Link
+              to="/collection/all?category=Outer+Wear"
+              className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-600 transition hover:text-[#321326]"
+            >
+              Outerwear
+            </Link>
+
+            <Link
+              to="/collection/all?category=Accessories"
+              className="text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-600 transition hover:text-[#321326]"
+            >
+              Accessories
+            </Link>
+
+            <Link
+              to="/collection/all"
+              className="text-[11px] font-semibold uppercase tracking-[0.22em] text-[#7b315f] transition hover:text-[#321326]"
+            >
+              All Collections
+            </Link>
+
+          </div>
+        </div>
+
+      </header>
+
+      {/* CART */}
+      <CartDrawer
+        draweropen={draweropen}
+        handlecartdrawer={handleCartDrawer}
+      />
+
+      {/* MOBILE OVERLAY */}
+      {menuopen && (
+        <div
+          onClick={handleMenuOpen}
+          className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm lg:hidden"
+        />
+      )}
+
+      {/* MOBILE MENU */}
+      <aside
+        className={`fixed right-0 top-0 z-50 flex h-full w-[88%] max-w-[390px] flex-col bg-[#fbf8f4] shadow-2xl transition-transform duration-300 lg:hidden ${
+          menuopen ? 'translate-x-0' : 'translate-x-full'
+        }`}
       >
-        <div className='flex justify-end p-4'>
-          <button onClick={handlemenuopen}>
-            <i className="ri-close-line text-2xl"></i>
-          </button>
-        </div>
 
-        <div className='px-6'>
-          <h2 className='text-2xl font-semibold text-gray-700 mb-6'>Menu</h2>
+        {/* MOBILE HEADER */}
+        <div className="flex items-center justify-between border-b border-black/10 px-6 py-6">
 
-          <Link to="/" className='text-lg text-gray-800 font-bold mb-6 block' onClick={handlemenuopen}>
-            FASSION ERA.
+          <Link
+            to="/"
+            onClick={handleMenuOpen}
+            className="font-serif text-xl font-bold tracking-wide text-[#321326]"
+          >
+            SHOPSHIELD
           </Link>
 
-          <div className='flex flex-col space-y-4'>
-            <Link to="/collection/all?gender=Men" onClick={handlemenuopen} className='text-gray-700 hover:text-black'>
-              Mens
-            </Link>
-            <Link to="/collection/all?gender=Women" onClick={handlemenuopen} className='text-gray-700 hover:text-black'>
-              Women
-            </Link>
-            <Link to="/collection/all?category=Top+wear" onClick={handlemenuopen} className='text-gray-700 hover:text-black'>
-              Top wear
-            </Link>
-            <Link to="/collection/all?category=Bottom+wear" onClick={handlemenuopen} className='text-gray-700 hover:text-black'>
-              Bottom wear
-            </Link>
-          </div>
-        </div>
-      </div>
-    </>
-  )
-}
+          <button
+            onClick={handleMenuOpen}
+            type="button"
+            className="rounded-full p-2 hover:bg-[#eee5e8]"
+          >
+            <FiX size={23} />
+          </button>
 
-export default Navbar
+        </div>
+
+        {/* MOBILE SEARCH */}
+        <div className="border-b border-black/10 px-6 py-5">
+          <Search />
+        </div>
+
+        {/* MOBILE LINKS */}
+        <nav className="flex flex-col px-6 py-8">
+
+          <p className="mb-5 text-[10px] font-bold uppercase tracking-[0.3em] text-[#7b315f]">
+            Shop
+          </p>
+
+          <MobileLink
+            to="/collection/all"
+            label="New Arrivals"
+            close={handleMenuOpen}
+          />
+
+          <MobileLink
+            to="/collection/all?gender=Women"
+            label="Women"
+            close={handleMenuOpen}
+          />
+
+          <MobileLink
+            to="/collection/all?gender=Men"
+            label="Men"
+            close={handleMenuOpen}
+          />
+
+          <MobileLink
+            to="/collection/all?category=Top+Wear"
+            label="Tops"
+            close={handleMenuOpen}
+          />
+
+          <MobileLink
+            to="/collection/all?category=Bottom+Wear"
+            label="Bottoms"
+            close={handleMenuOpen}
+          />
+
+          <MobileLink
+            to="/collection/all?category=Dresses"
+            label="Dresses"
+            close={handleMenuOpen}
+          />
+
+          <MobileLink
+            to="/collection/all"
+            label="All Collections"
+            close={handleMenuOpen}
+          />
+
+        </nav>
+
+        {/* MOBILE FOOTER */}
+        <div className="mt-auto border-t border-black/10 p-6">
+
+          <Link
+            to="/profile"
+            onClick={handleMenuOpen}
+            className="flex items-center gap-3 text-sm font-semibold"
+          >
+            <FiUser size={18} />
+            My Account
+          </Link>
+
+          {user && user.role === 'admin' && (
+            <Link
+              to="/admin"
+              onClick={handleMenuOpen}
+              className="mt-5 block text-sm font-semibold"
+            >
+              Admin Dashboard
+            </Link>
+          )}
+
+        </div>
+
+      </aside>
+    </>
+  );
+};
+
+const MobileLink = ({ to, label, close }) => {
+  return (
+    <Link
+      to={to}
+      onClick={close}
+      className="border-b border-black/10 py-5 font-serif text-2xl text-[#321326] transition hover:pl-2"
+    >
+      {label}
+    </Link>
+  );
+};
+
+export default Navbar;
