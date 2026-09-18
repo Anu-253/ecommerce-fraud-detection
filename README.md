@@ -1,77 +1,200 @@
-# E-Commerce Fraud Detection
+# 🛡️ E-Commerce Fraud Detection System
 
-An e-commerce website with a fraud detection and risk assessment system.
+A full-stack e-commerce website with an integrated fraud detection and risk assessment system.
 
-## About the Project
+## 📌 About the Project
 
-This project is a full-stack e-commerce website with an additional fraud detection module.
+This project is an e-commerce platform developed with a fraud detection system integrated into the order and payment flow.
 
-The system allows users to browse products, add them to a cart, place orders and make payments. Along with the normal e-commerce flow, the backend checks orders for certain fraud indicators and assigns a risk level to the transaction.
+The website provides the basic features of an online shopping platform such as browsing products, adding items to a cart, checkout, payments and order management. Along with this, the backend checks transactions for different fraud-related indicators and calculates a risk score for each order.
 
-The project also includes features such as an AI shopping assistant, price and review transparency, and a "Make an Offer" feature.
+The main idea is to detect potentially suspicious orders at the time of purchase instead of treating fraud detection as a completely separate process.
 
-## Features
+The project also includes additional features such as an AI shopping assistant, price and review transparency, and a "Make an Offer" feature.
+
+---
+
+## ✨ Features
+
+### 🛒 E-Commerce
 
 - User registration and login
-- Browse and search products
+- Product listing
+- Product search and categories
 - Product details
-- Shopping cart
-- Checkout and order placement
+- Add/remove products from cart
+- Update cart quantities
+- Checkout
+- Order placement
+- Payment attempt tracking
 - Order history
-- Fraud detection and risk assessment
-- AI shopping assistant
-- Price and review comparison
-- Make an Offer feature
 
-## Fraud Detection
+### 🛡️ Fraud Detection
 
-The fraud detection module checks an order for different risk factors, such as:
+The system checks an order for different factors that may indicate suspicious activity.
 
-- Multiple accounts using the same address
+Some of the checks include:
+
+- Multiple accounts associated with the same address
 - Multiple failed payment attempts
 - High-value orders
-- Other information related to the order and user
+- User and order-related information
+- Combination of multiple suspicious indicators
 
-Based on the detected factors, the system calculates a risk score and classifies the order as:
+After checking these factors, the system generates a risk score and assigns a risk level:
 
-- LOW
-- MEDIUM
-- HIGH
+| Risk Level | Meaning |
+|------------|---------|
+| LOW | No major suspicious indicators detected |
+| MEDIUM | Some risk indicators are present |
+| HIGH | Multiple or significant risk indicators are detected |
 
-The fraud check is connected to the order creation flow so that an order can be assessed when it is placed.
+The risk assessment is connected directly to the order flow so that orders can be checked when they are created.
 
-## Tech Stack
+### 🤖 AI Shopping Assistant
 
-**Frontend**
-- React
-- Vite
-- Tailwind CSS
-- React Router
-- Lucide React
+An AI-based shopping assistant is included to help users while browsing the platform.
 
-**Backend**
-- Node.js
-- Express.js
-- REST API
-- Mongoose
+It is intended to make it easier for users to find products and get product-related assistance without having to manually search through everything.
 
-**Database**
-- MongoDB
+### 💰 Price & Review Transparency
 
-**Tools**
-- Postman
-- MongoDB Atlas
-- Git & GitHub
-- VS Code
+The project also focuses on making product information more transparent.
 
-## Project Structure
+The feature is intended to help users compare prices and understand product reviews before making a purchase.
+
+### 🤝 Make an Offer
+
+Selected products can support a "Make an Offer" feature where users can suggest a price instead of only purchasing at the listed price.
+
+This adds a bargaining/negotiation aspect to the e-commerce experience.
+
+---
+
+## 🔐 Fraud Detection Workflow
+
+The fraud detection process is connected to the order creation process.
+
+```text
+User places an order
+        ↓
+Order is created
+        ↓
+Fraud information is collected
+        ↓
+Fraud rules are checked
+        ↓
+Risk score is calculated
+        ↓
+Risk level is assigned
+        ↓
+LOW / MEDIUM / HIGH
+
+## 📁 Project Structure
 
 ```text
 ecommerce-fraud-detection/
 │
 ├── backend/
+│   ├── Middleware/
+│   │   └── authmiddleware.js
+│   │
+│   ├── Routes/
+│   │   ├── adminRoute.js
+│   │   ├── adminorderRoute.js
+│   │   ├── cartRoutes.js
+│   │   ├── checkoutroutes.js
+│   │   ├── fraudCaseRoutes.js
+│   │   ├── orderRoutes.js
+│   │   ├── productadminRoute.js
+│   │   ├── productroutes.js
+│   │   ├── subscribeRoute.js
+│   │   ├── uploadRoutes.js
+│   │   └── userRoutes.js
+│   │
+│   ├── config/
+│   │   └── db.js
+│   │
+│   ├── data/
+│   │   └── products.js
+│   │
+│   ├── fraud/
+│   │   ├── applyFraudCheck.js
+│   │   ├── config.js
+│   │   ├── contextBuilder.js
+│   │   ├── decisionEngine.js
+│   │   ├── fraudDetection.js
+│   │   ├── riskScoring.js
+│   │   │
+│   │   └── rules/
+│   │       ├── failedPayment.js
+│   │       ├── highValue.js
+│   │       ├── index.js
+│   │       ├── multipleAccount.js
+│   │       ├── newAccount.js
+│   │       ├── sharedAddress.js
+│   │       ├── sharedDevice.js
+│   │       ├── sharedPhone.js
+│   │       ├── suspiciousIp.js
+│   │       └── velocity.js
+│   │
+│   ├── models/
+│   │   ├── FraudAssessment.js
+│   │   ├── FraudCase.js
+│   │   ├── PaymentAttempt.js
+│   │   ├── Subriber.js
+│   │   ├── User.js
+│   │   ├── cart.js
+│   │   ├── checkout.js
+│   │   ├── order.js
+│   │   └── product.js
+│   │
+│   ├── package.json
+│   └── server.js
 │
 ├── frontend/
+│   ├── Redux/
+│   │   ├── slice/
+│   │   │   ├── adminProductSlice.js
+│   │   │   ├── adminSlice.js
+│   │   │   ├── adminorderSlice.js
+│   │   │   ├── authslice.js
+│   │   │   ├── cartSlice.js
+│   │   │   ├── checkoutSlice.js
+│   │   │   ├── orderSlice.js
+│   │   │   └── productsSlice.js
+│   │   │
+│   │   └── store.js
+│   │
+│   ├── src/
+│   │   ├── Components/
+│   │   │   ├── Admin/
+│   │   │   ├── Common/
+│   │   │   ├── Layout/
+│   │   │   ├── cart/
+│   │   │   └── products/
+│   │   │
+│   │   ├── Pages/
+│   │   │   ├── AdminHomepage.jsx
+│   │   │   ├── CollectionPage.jsx
+│   │   │   ├── Home.jsx
+│   │   │   ├── Login.jsx
+│   │   │   ├── MyOrderPage.jsx
+│   │   │   ├── OrderDetailsPage.jsx
+│   │   │   ├── Profil.jsx
+│   │   │   ├── Register.jsx
+│   │   │   └── orderConformationPage.jsx
+│   │   │
+│   │   ├── assets/
+│   │   ├── App.jsx
+│   │   ├── index.css
+│   │   └── main.jsx
+│   │
+│   ├── public/
+│   ├── package.json
+│   ├── tailwind.config.js
+│   ├── vite.config.js
+│   └── index.html
 │
 ├── README.md
 └── package-lock.json
