@@ -86,9 +86,18 @@ const orderSchema = new mongoose.Schema({
     },
     status: {
   type: String,
-  enum: ["Processing", "Shipped", "Delivered", "Cancelled"],
+  enum: ["Processing", "Shipped", "Delivered", "Cancelled", "Verification Required", "On Hold"],
   default: "Processing"
-}
+},
+    // --- Added for fraud detection ---
+    // Both optional; populated by the fraud check right before the order is saved.
+    // ipAddress also gives future orders a history to check SUSPICIOUS_IP against.
+    ipAddress: {
+        type: String,
+    },
+    deviceId: {
+        type: String,
+    },
 
 }, { timestamps: true });
 

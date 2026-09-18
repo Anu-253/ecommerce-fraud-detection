@@ -1,5 +1,6 @@
 const express = require("express");
 const Order = require("../models/order");
+const { applyFraudCheck } = require("../fraud/applyFraudCheck"); // NEW
 const {protect} = require("../Middleware/authmiddleware");
 const router = express.Router();
 
@@ -62,11 +63,20 @@ router.post("/", protect, async (req, res) => {
       isPaid,
       paidAt,
       paymentStatus,
-      status
+      status,
+      // NEW: capture request-level fraud signals on the order itself
+      ipAddress: req.ip,
+      deviceId: req.body.deviceId || null,
     });
 
     const savedOrder = await newOrder.save();
-    res.status(201).json(savedOrder);
+
+    // NEW: run the fraud engine now that the order exists
+    const fraudResult = await applyFraudCheck(savedOrder);
+
+    // Backward-compatible response: every original order field stays at the
+    // top level, with one extra "fraud" key added.
+    res.status(201).json({ ...savedOrder.toObject(), fraud: fraudResult });
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: "Server Error" });
