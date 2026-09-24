@@ -38,14 +38,27 @@ router.post("/", protect, async (req, res) => {
       orderItems,
       shippingAddress,
       paymentMethod,
-      isPaid,
-      paidAt,
-      paymentStatus,
-      status
+      // FIX (Issue 4): isPaid / paidAt / paymentStatus / status are
+      // intentionally NOT read from req.body anymore. This route has no
+      // payment-verification step of its own (that only happens via the
+      // checkout -> /:id/pay -> /:id/finalize flow), so a client could
+      // previously mark their own order paid/delivered directly. This
+      // route now always creates orders in the same "unpaid, pending,
+      // Processing" state the Order schema already defaults to; the fraud
+      // engine still runs exactly as before on top of that.
     } = req.body;
 
     if (!orderItems || orderItems.length === 0) {
       return res.status(400).json({ message: "No order items" });
+    }
+
+    // FIX (Issue 5): reject non-positive per-item price/quantity before they
+    // can silently produce a totalPrice of 0 or less.
+    const hasInvalidItem = orderItems.some(
+      (item) => !(Number(item.price) > 0) || !(Number(item.quantity) > 0)
+    );
+    if (hasInvalidItem) {
+      return res.status(400).json({ message: "Each order item must have a positive price and quantity" });
     }
 
     // Calculate totalPrice
@@ -54,16 +67,20 @@ router.post("/", protect, async (req, res) => {
       0
     );
 
+    // FIX (Issue 5): belt-and-suspenders check on the computed total itself.
+    if (!(totalPrice > 0)) {
+      return res.status(400).json({ message: "Order total must be greater than zero" });
+    }
+
     const newOrder = new Order({
       user: req.user._id,
       orderItems,
       shippingAddress,
       paymentMethod,
       totalPrice,
-      isPaid,
-      paidAt,
-      paymentStatus,
-      status,
+      // isPaid, paidAt, paymentStatus, status all left unset here on purpose
+      // so the Order schema's own defaults apply (isPaid: false,
+      // paymentStatus: "pending", status: "Processing").
       // NEW: capture request-level fraud signals on the order itself
       ipAddress: req.ip,
       deviceId: req.body.deviceId || null,

@@ -18,6 +18,11 @@ router.post("/", protect, async (req, res) => {
     return res.status(400).json({ message: "Please fill all the fields" });
   }
 
+  // FIX (Issue 5): totalPrice must be a positive number.
+  if (!(Number(totalPrice) > 0)) {
+    return res.status(400).json({ message: "Order total must be greater than zero" });
+  }
+
   try {
     const newCheckout = await Checkout.create({
       user: req.user._id,

@@ -32,6 +32,7 @@ async function applyFraudCheck(order) {
     ipAddress: order.ipAddress,
     deviceId: order.deviceId,
     shippingAddress: order.shippingAddress,
+    orderId: order._id, // FIX (Issue 3): so it can be excluded from its own IP history
   });
 
   const result = evaluateTransaction(context);

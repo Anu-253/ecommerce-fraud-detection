@@ -26,4 +26,14 @@ function evaluate(context) {
   };
 }
 
-module.exports = { ruleCode: RULE_CODE, enabled: true, evaluate };
+module.exports = {
+  ruleCode: RULE_CODE,
+  // DISABLED (Issue 1, user decision): User has no phone field and the app
+  // never collects one, so this rule could never legitimately trigger.
+  // Disabled via the registry's own enabled-flag mechanism (see
+  // fraud/fraudDetection.js: `if (rule.enabled === false) continue;`) rather
+  // than deleted, so it can be re-enabled later if phone collection is added
+  // without having to reconstruct the rule.
+  enabled: false,
+  evaluate,
+};

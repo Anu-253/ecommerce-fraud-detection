@@ -35,9 +35,14 @@ function normalizeAddress(shippingAddress) {
  * @param {String} [input.ipAddress]     - request IP (req.ip)
  * @param {String} [input.deviceId]      - optional device fingerprint from the client
  * @param {Object} [input.shippingAddress] - { address, city, postalCode, country }
+ * @param {String} [input.orderId]       - the order currently being assessed. Already
+ *                                          persisted by the time this runs (see
+ *                                          applyFraudCheck.js), so it must be excluded
+ *                                          from any "how many PRIOR orders..." query or
+ *                                          it will always count itself. FIX (Issue 3).
  * @returns {Promise<Object>} transaction context consumed by fraud rules
  */
-async function buildTransactionContext({ userId, amount, ipAddress, deviceId, shippingAddress }) {
+async function buildTransactionContext({ userId, amount, ipAddress, deviceId, shippingAddress, orderId }) {
   const user = await User.findById(userId).lean();
   if (!user) {
     throw new Error(`User not found: ${userId}`);
@@ -86,8 +91,17 @@ async function buildTransactionContext({ userId, amount, ipAddress, deviceId, sh
       createdAt: { $gte: velocityWindowStart },
     }),
 
+    // FIX (Issue 3): exclude the order currently being assessed — it was
+    // already saved before applyFraudCheck runs (see applyFraudCheck.js),
+    // so without this exclusion it always counts as one "prior" order from
+    // this IP and isUnfamiliarIp (priorOrdersFromThisIp === 0) could never
+    // be true.
     ipAddress
-      ? Order.countDocuments({ user: userId, ipAddress })
+      ? Order.countDocuments({
+          user: userId,
+          ipAddress,
+          ...(orderId ? { _id: { $ne: orderId } } : {}),
+        })
       : Promise.resolve(0),
   ]);
 

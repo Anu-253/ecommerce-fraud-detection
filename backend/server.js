@@ -12,6 +12,7 @@ const subscribeRoutes=require("./Routes/subscribeRoute")
 const adminRoute=require("./Routes/adminRoute");
 const productadminRoute=require("./Routes/productadminRoute");
 const adminorderRoute=require("./Routes/adminorderRoute");
+const fraudCaseRoutes=require("./Routes/fraudCaseRoutes"); // FIX (Issue 2): was never mounted
 
 dotenv.config(); // Load .env before using process.env
 
@@ -41,6 +42,7 @@ app.use("/api",subscribeRoutes)
 app.use("/api/admin/users",adminRoute)
 app.use("/api/admin/products",productadminRoute)
 app.use("/api/admin/orders",adminorderRoute);
+app.use("/api/fraud-cases",fraudCaseRoutes); // FIX (Issue 2): matches the GET/PUT paths documented inside fraudCaseRoutes.js
 
 // start server
 app.listen(PORT, () => {
