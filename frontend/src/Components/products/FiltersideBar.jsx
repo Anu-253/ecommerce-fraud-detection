@@ -1,207 +1,180 @@
 import React, { useEffect, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
+
+// NOTE ON FIELD NAMES: the live filter thunk (Redux/slice/productsSlice.js)
+// reads `minprice` / `maxprice` (lowercase) from the query string. Category
+// values are kept in sync with the values the navbar links already send
+// ("Top Wear" / "Bottom Wear" / "Accessories"), so clicking a nav link and
+// using the sidebar always agree on the same filter value.
+
+const CATEGORIES = ['Top Wear', 'Bottom Wear', 'Dresses', 'Outerwear', 'Accessories'];
+const COLORS = ['Black', 'Blue', 'Red', 'Green', 'Grey', 'White', 'Beige', 'Maroon', 'Orange', 'Pink', 'Navy'];
+const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL'];
+const GENDERS = ['Men', 'Women'];
+const MAX_PRICE = 10000;
+
+const AccordionSection = ({ title, defaultOpen = true, children }) => {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="border-b border-line py-5 first:pt-0">
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex w-full items-center justify-between text-left"
+      >
+        <span className="text-[11.5px] uppercase tracking-widest2 text-ink">{title}</span>
+        <i className={`ri-${open ? 'subtract' : 'add'}-line text-ink-muted text-base`} />
+      </button>
+      {open && <div className="mt-4">{children}</div>}
+    </div>
+  );
+};
 
 const FiltersideBar = () => {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [filter, setFilter] = useState({
-    category: "",
-    gender: "",
-    color: "",
+    category: '',
+    gender: '',
+    color: '',
     size: [],
-    material: [],
-    brand: [],
-    minPrice: 0,
-    maxPrice: 100,
+    minprice: 0,
+    maxprice: MAX_PRICE,
   });
-
-  const [priceRange, setPriceRange] = useState([0, 100]);
-  
-
-  const categories = ["Top wear", "Bottom wear"];
-  const colors = ["Red", "Blue", "Black", "Green", "Yellow", "Gray", "White", "Pink", "Beige", "Navy"];
-  const sizes = ["XS", "S", "M", "L", "XL", "XXL"];
-  const materials = ["Cotton", "Wool", "Denim", "Polyester", "Silk", "Linen", "Viscose", "Fleece"];
-  const brands = ["Urban Threads", "Modern Fit", "Street Style", "Beach Breeze", "Fashionista", "ChicStyle"];
-  const genders = ["Men", "Women"];
 
   useEffect(() => {
     const params = Object.fromEntries([...searchParams]);
     setFilter({
-      category: params.category || "",
-      gender: params.gender || "",
-      color: params.color || "",
-      size: params.size ? params.size.split(",") : [],
-      material: params.material ? params.material.split(",") : [],
-      brand: params.brand ? params.brand.split(",") : [],
-      minPrice: Number(params.minPrice) || 0,
-      maxPrice: Number(params.maxPrice) || 100,
+      category: params.category || '',
+      gender: params.gender || '',
+      color: params.color || '',
+      size: params.size ? params.size.split(',') : [],
+      minprice: Number(params.minprice) || 0,
+      maxprice: Number(params.maxprice) || MAX_PRICE,
     });
-    setPriceRange([Number(params.minPrice) || 0, Number(params.maxPrice) || 100]);
   }, [searchParams]);
 
-  const handleChange = (key, value) => {
-    const updatedFilter = {
-      ...filter,
-      [key]: value,
-    };
-    setFilter(updatedFilter);
-
-    const newParams = {
-      ...Object.fromEntries([...searchParams]),
-      [key]: Array.isArray(value) ? value.join(",") : value,
-    };
-    setSearchParams(newParams);
-    
-  };
-
-  const handleArrayChange = (key, value) => {
-    let updatedArray = [...filter[key]];
-    if (updatedArray.includes(value)) {
-      updatedArray = updatedArray.filter((item) => item !== value);
+  const updateParam = (key, value) => {
+    const next = { ...Object.fromEntries([...searchParams]) };
+    if (value === '' || value == null || (Array.isArray(value) && value.length === 0)) {
+      delete next[key];
     } else {
-      updatedArray.push(value);
+      next[key] = Array.isArray(value) ? value.join(',') : value;
     }
-    handleChange(key, updatedArray);
+    setSearchParams(next);
   };
 
-  const handlePriceChange = (e) => {
-    const max = parseInt(e.target.value, 10);
-    setPriceRange([0, max]);
-    handleChange("maxPrice", max);
+  const toggleGender = (g) => updateParam('gender', filter.gender === g ? '' : g);
+  const toggleCategory = (c) => updateParam('category', filter.category === c ? '' : c);
+  const toggleColor = (c) => updateParam('color', filter.color === c ? '' : c);
+  const toggleSize = (s) => {
+    const next = filter.size.includes(s) ? filter.size.filter((x) => x !== s) : [...filter.size, s];
+    updateParam('size', next);
   };
+
+  const clearAll = () => setSearchParams({});
+
+  const activeCount =
+    (filter.category ? 1 : 0) +
+    (filter.gender ? 1 : 0) +
+    (filter.color ? 1 : 0) +
+    filter.size.length +
+    (filter.maxprice < MAX_PRICE ? 1 : 0);
 
   return (
     <aside className="w-full">
-      <h2 className="text-xl font-bold mb-4">Filters</h2>
-
-      {/* Gender */}
-      <div className="mb-4">
-        <label className="font-bold">Gender</label>
-        <div className="mt-2">
-          {genders.map((g) => (
-            <div key={g} className="flex items-center mb-2">
-              <input
-                type="radio"
-                name="gender"
-                value={g}
-                checked={filter.gender === g}
-                onChange={() => handleChange("gender", g)}
-                className="mr-2 accent-blue-600"
-              />
-              <label>{g}</label>
-            </div>
-          ))}
-        </div>
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="font-serif text-lg text-ink flex items-center gap-2">
+          Filters {activeCount > 0 && <span className="text-[11px] font-sans text-plum">({activeCount})</span>}
+        </h2>
+        {activeCount > 0 && (
+          <button onClick={clearAll} className="text-[11px] uppercase tracking-widest2 text-plum hover:underline">
+            Clear All
+          </button>
+        )}
       </div>
 
-      {/* Category */}
-      <div className="mb-4">
-        <label className="font-bold">Category</label>
-        <div className="mt-2">
-          {categories.map((c) => (
-            <div key={c} className="flex items-center mb-2">
-              <input
-                type="radio"
-                name="category"
-                value={c}
-                checked={filter.category === c}
-                onChange={() => handleChange("category", c)}
-                className="mr-2 accent-blue-600"
-              />
-              <label>{c}</label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Color */}
-      <div className="mb-4">
-        <label className="font-bold">Color</label>
+      <AccordionSection title="Gender">
         <div className="flex flex-wrap gap-2">
-          {colors.map((c) => (
+          {GENDERS.map((g) => (
+            <button
+              key={g}
+              onClick={() => toggleGender(g)}
+              className={`px-3.5 py-1.5 text-[12px] border transition-colors ${
+                filter.gender === g ? 'border-ink bg-ink text-cream' : 'border-line text-ink-soft hover:border-ink'
+              }`}
+            >
+              {g}
+            </button>
+          ))}
+        </div>
+      </AccordionSection>
+
+      <AccordionSection title="Category">
+        <div className="flex flex-wrap gap-2">
+          {CATEGORIES.map((c) => (
             <button
               key={c}
-              name="color"
-              style={{ backgroundColor: c.toLowerCase() }}
-              className={`w-8 h-8 rounded-full border border-gray-300 cursor-pointer transition hover:scale-105 ${
-                filter.color === c ? 'ring-2 ring-blue-600' : ''
+              onClick={() => toggleCategory(c)}
+              className={`px-3.5 py-1.5 text-[12px] border transition-colors ${
+                filter.category === c ? 'border-ink bg-ink text-cream' : 'border-line text-ink-soft hover:border-ink'
               }`}
-              onClick={() => handleChange("color", c)}
-            />
+            >
+              {c}
+            </button>
           ))}
         </div>
-      </div>
+      </AccordionSection>
 
-      {/* Size */}
-      <div className="mb-4">
-        <label className="font-bold">Size</label>
-        <div className="mt-2">
-          {sizes.map((s) => (
-            <div key={s} className="flex items-center mb-2">
-              <input
-                type="checkbox"
-                checked={filter.size.includes(s)}
-                onChange={() => handleArrayChange("size", s)}
-                className="mr-2 accent-blue-600"
-              />
-              <label>{s}</label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Material */}
-      <div className="mb-4">
-        <label className="font-bold">Material</label>
-        <div className="mt-2">
-          {materials.map((m) => (
-            <div key={m} className="flex items-center mb-2">
-              <input
-                type="checkbox"
-                checked={filter.material.includes(m)}
-                onChange={() => handleArrayChange("material", m)}
-                className="mr-2 accent-blue-600"
-              />
-              <label>{m}</label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Brand */}
-      <div className="mb-4">
-        <label className="font-bold">Brand</label>
-        <div className="mt-2">
-          {brands.map((b) => (
-            <div key={b} className="flex items-center mb-2">
-              <input
-                type="checkbox"
-                checked={filter.brand.includes(b)}
-                onChange={() => handleArrayChange("brand", b)}
-                className="mr-2 accent-blue-600"
-              />
-              <label>{b}</label>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Price Range */}
-      <div className="mb-4">
-        <label className="font-bold"> Price Range</label>
+      <AccordionSection title="Price">
         <input
           type="range"
           min={0}
-          max={100}
-          value={priceRange[1]}
-          onChange={handlePriceChange}
-          className="w-full bg-gray-300 text-gray-600 h-2 mt-2 accent-blue-600"
+          max={MAX_PRICE}
+          step={100}
+          value={filter.maxprice}
+          onChange={(e) => updateParam('maxprice', e.target.value)}
+          className="w-full accent-plum"
         />
-        <div className="flex justify-between text-gray-600 mt-2">
-          <span>${priceRange[0]}</span>
-          <span>${priceRange[1]}</span>
+        <div className="flex justify-between text-[12px] text-ink-muted mt-1">
+          <span>₹0</span>
+          <span>₹{filter.maxprice.toLocaleString('en-IN')}</span>
         </div>
+      </AccordionSection>
+
+      <AccordionSection title="Color">
+        <div className="flex flex-wrap gap-2">
+          {COLORS.map((c) => (
+            <button
+              key={c}
+              onClick={() => toggleColor(c)}
+              title={c}
+              style={{ backgroundColor: c.toLowerCase() }}
+              className={`h-7 w-7 rounded-full border transition-transform hover:scale-110 ${
+                filter.color === c ? 'ring-2 ring-plum ring-offset-2 ring-offset-cream' : 'border-line'
+              }`}
+            />
+          ))}
+        </div>
+      </AccordionSection>
+
+      <AccordionSection title="Size" defaultOpen={false}>
+        <div className="flex flex-wrap gap-2">
+          {SIZES.map((s) => (
+            <button
+              key={s}
+              onClick={() => toggleSize(s)}
+              className={`h-8 w-8 flex items-center justify-center text-[12px] border transition-colors ${
+                filter.size.includes(s) ? 'border-ink bg-ink text-cream' : 'border-line text-ink-soft hover:border-ink'
+              }`}
+            >
+              {s}
+            </button>
+          ))}
+        </div>
+      </AccordionSection>
+
+      <div className="pt-5 text-[11px] text-ink-muted leading-relaxed">
+        Trust Score, Delivery and Discount filters are on the way — they'll switch on the moment
+        those fields are live on every listing.
       </div>
     </aside>
   );

@@ -1,3 +1,106 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-cream text-ink font-sans antialiased;
+    font-feature-settings: "ss01" 1;
+    background-image:
+      radial-gradient(circle at 10% 0%, rgba(90, 27, 49, 0.035), transparent 28rem),
+      radial-gradient(circle at 90% 15%, rgba(203, 185, 143, 0.08), transparent 30rem);
+  }
+  h1, h2, h3, h4 {
+    @apply font-serif text-ink;
+    letter-spacing: -0.01em;
+  }
+  ::selection {
+    @apply bg-plum text-cream;
+  }
+}
+
+@layer components {
+  .container-shop {
+    @apply max-w-screen-2xl mx-auto px-5 md:px-8 lg:px-10;
+  }
+
+  .eyebrow {
+    @apply inline-flex items-center gap-2 text-[11px] tracking-widest2 uppercase font-medium text-ink-muted;
+  }
+
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 px-6 py-3 text-[13px] tracking-widest2 uppercase font-medium transition-colors duration-200;
+  }
+  .btn-primary {
+    @apply btn bg-ink text-cream hover:bg-plum;
+  }
+  .btn-outline {
+    @apply btn border border-ink text-ink hover:bg-ink hover:text-cream;
+  }
+  .btn-plum {
+    @apply btn bg-plum text-cream hover:bg-plum-dark;
+  }
+  .btn-ghost {
+    @apply btn border border-line text-ink hover:border-ink;
+  }
+
+  .pill {
+    @apply inline-flex items-center gap-1.5 rounded-full border border-line bg-cream-soft px-3 py-1 text-[11px] font-medium tracking-wide text-ink-soft;
+  }
+
+  .card-line {
+    @apply border border-line bg-cream-soft;
+  }
+
+  .section-title {
+    @apply font-serif text-3xl md:text-4xl leading-[1.08] text-ink;
+  }
+
+  .section-eyebrow {
+    @apply eyebrow text-plum mb-3;
+  }
+
+  .input-line {
+    @apply w-full border border-line bg-cream-soft px-4 py-3 text-sm text-ink placeholder:text-ink-muted focus:outline-none focus:border-ink transition-colors;
+  }
+}
+
+@layer utilities {
+  .scrollbar-hide::-webkit-scrollbar { display: none; }
+  .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+  .text-balance { text-wrap: balance; }
+}
+
+
+@layer components {
+  .product-card-media {
+    isolation: isolate;
+  }
+
+  .product-card-media::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(180deg, rgba(24,20,15,0.03), transparent 35%, rgba(24,20,15,0.08));
+    opacity: .7;
+  }
+
+  .section-shell {
+    @apply rounded-[28px] border border-line bg-cream-soft;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}

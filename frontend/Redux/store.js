@@ -7,6 +7,7 @@ import orderReducer from "./slice/orderSlice";
 import adminReducer from "./slice/adminSlice";
 import adminProductsReducer from "./slice/adminProductSlice";
 import adminOrdersReducer from "./slice/adminorderSlice";
+import wishlistReducer from "./slice/wishlistSlice";
 
 const store = configureStore({
   reducer: {
@@ -18,6 +19,7 @@ const store = configureStore({
     admin: adminReducer,
     adminProducts: adminProductsReducer,  // changed to plural camelCase
     adminOrders: adminOrdersReducer,
+    wishlist: wishlistReducer,
   },
 });
 

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
-import { addUser, fetchusers, updateUserInfo } from '../../../Redux/slice/adminSlice';
+import { addUser, fetchusers, updateUserInfo, deleteUser } from '../../../Redux/slice/adminSlice';
 
 const UserManagement = () => {
   const dispatch=useDispatch();
@@ -35,14 +35,7 @@ useEffect(() => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    dispatch(addUser(formData));
-    const newUser = {
-      _id: Date.now(), // unique id
-      name: formData.name,
-      email: formData.email,
-      role: formData.role
-    };
-    setUsers([...users, newUser]);
+    dispatch(addUser(formData)).then(() => dispatch(fetchusers()));
     setFormData({
       name: "",
       email: "",

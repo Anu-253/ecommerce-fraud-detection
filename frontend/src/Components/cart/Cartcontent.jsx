@@ -1,102 +1,85 @@
 import React from 'react';
 import { useDispatch } from 'react-redux';
-import { removeFromCart, updateCartItemQuantity } from '../../../Redux/slice/cartSlice';
+import { removeFromCart, updateCartItemQuantity, setLocalCart } from '../../../Redux/slice/cartSlice';
+import { formatPrice } from '../../lib/format';
 
 const Cartcontent = ({ cart, userId, guestId }) => {
   const dispatch = useDispatch();
 
-  const handleAddToCart = (productId, delta, quantity, size, color) => {
+  const handleAddToCart = (productId, delta, quantity, size, color, source) => {
     const newQuantity = quantity + delta;
-    if (newQuantity >= 1) {
-      dispatch(
-        updateCartItemQuantity({
-          productId,
-          quantity: newQuantity,
-          guestId,
-          userId,
-          size,
-          color,
-        })
+    if (source === 'catalog') {
+      if (newQuantity < 1) {
+        handleRemoveFromCart(productId, size, color, source);
+        return;
+      }
+      const products = (cart?.products || []).map((p) =>
+        p.productId === productId && p.size === size && p.color === color ? { ...p, quantity: newQuantity } : p
       );
+      const totalPrice = products.reduce((sum, p) => sum + Number(p.price || 0) * Number(p.quantity || 1), 0);
+      dispatch(setLocalCart({ products, totalPrice }));
+      return;
+    }
+    if (newQuantity >= 1) {
+      dispatch(updateCartItemQuantity({ productId, quantity: newQuantity, guestId, userId, size, color }));
     }
   };
 
-  const handleRemoveFromCart = (productId, size, color) => {
+  const handleRemoveFromCart = (productId, size, color, source) => {
+    if (source === 'catalog') {
+      const products = (cart?.products || []).filter((p) => !(p.productId === productId && p.size === size && p.color === color));
+      const totalPrice = products.reduce((sum, p) => sum + Number(p.price || 0) * Number(p.quantity || 1), 0);
+      dispatch(setLocalCart({ products, totalPrice }));
+      return;
+    }
     dispatch(removeFromCart({ productId, guestId, userId, size, color }));
   };
 
   return (
-    <div>
+    <div className="divide-y divide-line">
       {cart?.products?.length > 0 ? (
         cart.products.map((product, index) => {
-          console.log("Cart Product:", product);
-
-          // Robust image URL fallback
           const imageUrl =
-  typeof product.image === "string" && product.image.trim() !== ''
-    ? product.image
-    : product?.images && product.images.length > 0 && product.images[0].url && product.images[0].url.trim() !== ''
-    ? product.images[0].url
-    : null;
-
-
-          if (!imageUrl) {
-            console.warn(`No image found for product ${product.productId || product.id || 'unknown'}`);
-          }
+            typeof product.image === 'string' && product.image.trim() !== ''
+              ? product.image
+              : product?.images?.[0]?.url?.trim()
+              ? product.images[0].url
+              : null;
 
           return (
-            <div
-              key={index}
-              className="flex items-start justify-between mb-4 p-4 border-b"
-            >
-              <div className="flex items-start">
+            <div key={index} className="flex items-start justify-between gap-4 py-4">
+              <div className="flex items-start gap-4">
                 {imageUrl ? (
                   <img
                     src={imageUrl}
                     alt={product.name}
-                    className="w-16 h-24 object-cover mr-4 rounded"
+                    className="h-24 w-16 object-cover"
                     onError={(e) => {
                       e.target.onerror = null;
-                      e.target.src = '/placeholder.jpg'; // fallback image
+                      e.target.src = '/placeholder.jpg';
                     }}
                   />
                 ) : (
-                  <div className="w-16 h-24 bg-gray-200 mr-4 flex items-center justify-center rounded text-sm text-gray-500">
+                  <div className="flex h-24 w-16 items-center justify-center bg-sand-light text-[10px] text-ink-muted text-center">
                     No Image
                   </div>
                 )}
                 <div>
-                  <h3 className="font-semibold">{product.name}</h3>
-                  <p className="text-sm text-gray-600">
-                    Size: {product.size} | Color: {product.color}
+                  <h3 className="text-sm font-medium text-ink">{product.name}</h3>
+                  <p className="text-xs text-ink-muted mt-0.5">
+                    Size: {product.size} · Color: {product.color}
                   </p>
-                  <div className="mt-2 flex items-center">
+                  <div className="mt-3 flex items-center border border-line w-fit">
                     <button
-                      onClick={() =>
-                        handleAddToCart(
-                          product.productId,
-                          -1,
-                          product.quantity,
-                          product.size,
-                          product.color
-                        )
-                      }
-                      className="border rounded px-3 py-1 text-lg font-medium"
+                      onClick={() => handleAddToCart(product.productId, -1, product.quantity, product.size, product.color, product.source)}
+                      className="px-2.5 py-1 text-sm hover:text-plum"
                     >
-                      -
+                      −
                     </button>
-                    <span className="mx-3">{product.quantity}</span>
+                    <span className="px-2 text-sm">{product.quantity}</span>
                     <button
-                      onClick={() =>
-                        handleAddToCart(
-                          product.productId,
-                          1,
-                          product.quantity,
-                          product.size,
-                          product.color
-                        )
-                      }
-                      className="border rounded px-3 py-1 text-lg font-medium"
+                      onClick={() => handleAddToCart(product.productId, 1, product.quantity, product.size, product.color, product.source)}
+                      className="px-2.5 py-1 text-sm hover:text-plum"
                     >
                       +
                     </button>
@@ -104,17 +87,11 @@ const Cartcontent = ({ cart, userId, guestId }) => {
                 </div>
               </div>
               <div className="text-right">
-                <p className="font-semibold text-black">${product.price}</p>
+                <p className="text-sm font-semibold text-ink">{formatPrice(product.price)}</p>
                 <button
-                  onClick={() =>
-                    handleRemoveFromCart(
-                      product.productId,
-                      product.size,
-                      product.color
-                    )
-                  }
+                  onClick={() => handleRemoveFromCart(product.productId, product.size, product.color, product.source)}
                   aria-label="Remove item"
-                  className="text-red-600 hover:text-red-800 mt-2 text-xl"
+                  className="mt-3 text-ink-muted hover:text-rust"
                 >
                   <i className="ri-delete-bin-line"></i>
                 </button>
@@ -123,7 +100,7 @@ const Cartcontent = ({ cart, userId, guestId }) => {
           );
         })
       ) : (
-        <p className="text-center text-gray-600 mt-4">Your cart is empty.</p>
+        <p className="text-center text-ink-muted py-8">Your cart is empty.</p>
       )}
     </div>
   );

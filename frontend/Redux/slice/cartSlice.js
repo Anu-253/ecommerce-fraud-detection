@@ -101,6 +101,34 @@ export const mergeCart = createAsyncThunk(
   }
 );
 
+
+export const addCatalogToCart = (item) => (dispatch, getState) => {
+  const current = getState().cart.cart || { products: [] };
+  const products = [...(current.products || [])];
+  const existing = products.find(
+    (p) => String(p.productId) === String(item.productId) && p.color === item.color && p.size === item.size
+  );
+
+  if (existing) {
+    existing.quantity += item.quantity || 1;
+  } else {
+    products.push({
+      _id: item.productId,
+      productId: item.productId,
+      name: item.name,
+      price: Number(item.price) || 0,
+      image: item.image,
+      quantity: item.quantity || 1,
+      size: item.size || "Standard",
+      color: item.color || "Default",
+      source: "catalog",
+    });
+  }
+
+  const totalPrice = products.reduce((sum, p) => sum + Number(p.price || 0) * Number(p.quantity || 1), 0);
+  dispatch(setLocalCart({ products, totalPrice }));
+};
+
 const cartSlice = createSlice({
   name: "cart",
   initialState: {
@@ -109,6 +137,11 @@ const cartSlice = createSlice({
     error: null,
   },
   reducers: {
+    setLocalCart: (state, action) => {
+      state.cart = action.payload;
+      state.error = null;
+      saveCartToStorage(action.payload);
+    },
     clearCart: (state) => {
       state.cart = { products: [] };
       localStorage.removeItem("cart");
@@ -198,5 +231,5 @@ const cartSlice = createSlice({
   },
 });
 
-export const { clearCart } = cartSlice.actions;
+export const { clearCart, setLocalCart } = cartSlice.actions;
 export default cartSlice.reducer;

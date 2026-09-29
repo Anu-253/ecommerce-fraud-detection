@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { fetchUserOrders } from '../../Redux/slice/orderSlice';
+import { formatPrice } from '../lib/format';
+import EmptyState from '../Components/Common/EmptyState';
 
 const MyOrderPage = () => {
   const navigate = useNavigate();
@@ -12,77 +14,74 @@ const MyOrderPage = () => {
     dispatch(fetchUserOrders());
   }, [dispatch]);
 
-  const handleRowClick = (orderId) => {
-    navigate(`/order/${orderId}`);
-  };
+  const handleRowClick = (orderId) => navigate(`/order/${orderId}`);
 
-  if (loading) return <p>Loading...</p>;
-  if (error) return <p>Error: {error}</p>;
+  if (loading) return <p className="text-ink-muted py-8">Loading orders…</p>;
+  if (error) return <p className="text-rust py-8">Error: {error}</p>;
 
   return (
-    <div className="min-h-screen bg-gray-100 p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center text-blue-700">My Orders</h1>
-      <div className="relative shadow-md sm:rounded-lg overflow-hidden">
-        <table className="min-w-full text-left text-gray-500">
-          <thead>
-            <tr>
-              <th className="py-2 px-4 sm:py-3">Image</th>
-              <th className="py-2 px-4 sm:py-3">Order ID</th>
-              <th className="py-2 px-4 sm:py-3">Created</th>
-              <th className="py-2 px-4 sm:py-3">Shipping Address</th>
-              <th className="py-2 px-4 sm:py-3">Items</th>
-              <th className="py-2 px-4 sm:py-3">Price</th>
-              <th className="py-2 px-4 sm:py-3">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {orders?.length > 0 ? (
-              orders.map((order) => (
+    <div>
+      <h2 className="font-serif text-xl text-ink mb-5">Order History</h2>
+
+      {orders?.length > 0 ? (
+        <div className="card-line overflow-hidden overflow-x-auto">
+          <table className="min-w-full text-left text-sm">
+            <thead className="bg-cream-deep text-[10.5px] uppercase tracking-widest2 text-ink-muted">
+              <tr>
+                <th className="py-3 px-4">Item</th>
+                <th className="py-3 px-4">Order ID</th>
+                <th className="py-3 px-4">Placed</th>
+                <th className="py-3 px-4">Ships To</th>
+                <th className="py-3 px-4">Total</th>
+                <th className="py-3 px-4">Status</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-line">
+              {orders.map((order) => (
                 <tr
                   key={order._id}
                   onClick={() => handleRowClick(order._id)}
-                  className="border-b hover:bg-gray-50 cursor-pointer"
+                  className="cursor-pointer hover:bg-cream-deep/60 transition-colors"
                 >
-                  <td className="py-2 px-2 sm:py-4">
-                    <img
-                      src={order.orderItems?.[0]?.image}
-                      alt=""
-                      className="w-16 h-16 object-cover rounded"
-                    />
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={order.orderItems?.[0]?.image}
+                        alt=""
+                        className="h-12 w-12 object-cover"
+                      />
+                      <span className="text-ink-soft">{order.orderItems?.[0]?.name}</span>
+                    </div>
                   </td>
-                  <td className="py-2 px-4">{order._id}</td>
-                  <td className="py-2 px-4">
-                    {new Date(order.createdAt).toLocaleDateString()}{' '}
-                    {new Date(order.createdAt).toLocaleTimeString()}
+                  <td className="py-3 px-4 text-ink-muted">#{order._id.slice(-8)}</td>
+                  <td className="py-3 px-4 text-ink-muted">
+                    {new Date(order.createdAt).toLocaleDateString()}
                   </td>
-                  <td className="py-2 px-4">
+                  <td className="py-3 px-4 text-ink-muted">
                     {order.shippingAddress?.city}, {order.shippingAddress?.country}
                   </td>
-                  <td className="py-2 px-4">{order.orderItems?.[0]?.name}</td>
-                  <td className="py-2 px-4">${order.totalPrice}</td>
-                  <td className="py-2 px-4">
+                  <td className="py-3 px-4 text-ink font-medium">{formatPrice(order.totalPrice)}</td>
+                  <td className="py-3 px-4">
                     <span
-                      className={`px-2 py-1 rounded text-sm font-semibold ${
-                        order.isPaid
-                          ? 'bg-green-100 text-green-700'
-                          : 'bg-red-100 text-red-700'
+                      className={`px-2.5 py-1 text-[10.5px] uppercase tracking-wide font-medium ${
+                        order.isPaid ? 'bg-sage-light text-sage' : 'bg-rust-light text-rust'
                       }`}
                     >
                       {order.isPaid ? 'Paid' : 'Not Paid'}
                     </span>
                   </td>
                 </tr>
-              ))
-            ) : (
-              <tr>
-                <td colSpan="7" className="text-center py-4">
-                  No orders found.
-                </td>
-              </tr>
-            )}
-          </tbody>
-        </table>
-      </div>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      ) : (
+        <EmptyState
+          icon="ri-shopping-bag-3-line"
+          title="No orders yet"
+          body="Your verified ShopShield purchases will show up here."
+        />
+      )}
     </div>
   );
 };

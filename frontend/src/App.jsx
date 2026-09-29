@@ -6,8 +6,10 @@ import Register from "./Pages/Register";
 import { Toaster } from "sonner";
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import Profil from "./Pages/Profil";
+import Wishlist from "./Pages/Wishlist";
+import Collections from "./Pages/Collections";
 import CollectionPage from "./Pages/CollectionPage";
-import ProductDetails from "./Components/products/productsDetails";
+import ProductRoute from "./Components/products/ProductRoute";
 import Checout from "./Components/cart/Checout";
 import OrderConfirmationPage from "./Pages/orderConformationPage";
 import OrderDetailsPage from "./Pages/OrderDetailsPage";
@@ -34,9 +36,11 @@ const App = () => {
             <Route path="login" element={<Login />} />
             <Route path="register" element={<Register />} />
             <Route path="profile" element={<Profil />} />
+            <Route path="wishlist" element={<Wishlist />} />
+            <Route path="collections" element={<Collections />} />
            <Route path="collection/all" element={<CollectionPage />} />
 
-            <Route path="product/:id" element={<ProductDetails />} />
+            <Route path="product/:id" element={<ProductRoute />} />
             <Route path="checkout" element={<Checout />} />
             <Route path="order-conformation" element={<OrderConfirmationPage />} />
             <Route path="order/:id" element={<OrderDetailsPage />} />
